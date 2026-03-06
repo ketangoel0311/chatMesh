@@ -1,7 +1,8 @@
 require('dotenv').config();
 
-const http    = require('http');
-const express = require('express');
+const http          = require('http');
+const express       = require('express');
+const SocketService = require('./services/socket');
 
 async function init() {
   if (!process.env.REDIS_URL) {
@@ -9,9 +10,10 @@ async function init() {
     process.exit(1);
   }
 
-  const app    = express();
-  const server = http.createServer(app);
-  const PORT   = process.env.PORT || 8000;
+  const app           = express();
+  const socketService = new SocketService();
+  const server        = http.createServer(app);
+  const PORT          = process.env.PORT || 8000;
 
   app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin',  '*');
@@ -24,9 +26,10 @@ async function init() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-  app.get('/health', function(_req, res) {
-    res.json({ status: 'ok' });
-  });
+  app.get('/health', function(_req, res) { res.json({ status: 'ok' }); });
+
+  socketService.io.attach(server);
+  socketService.initListeners();
 
   server.listen(PORT, function() {
     process.stdout.write('server listening on port ' + PORT + '\n');
