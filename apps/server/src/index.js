@@ -1,8 +1,12 @@
-require('dotenv').config();
+const path = require("path");
+
+require("dotenv").config({
+  path: path.resolve(__dirname, "../.env"),
+});
 
 const fs     = require('fs');
 const http   = require('http');
-const path   = require('path');
+
 
 const express       = require('express');
 const multer        = require('multer');
